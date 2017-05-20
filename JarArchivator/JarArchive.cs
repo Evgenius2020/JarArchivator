@@ -1,21 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO.Compression;
 
 namespace JarArchivator
 {
     public class JarArchive : IJarArchive
     {
-        private string _archivePath;
+        private string _archiveFileName;
+
         public IEnumerable<IJarArchiveFile> Files { get; }
 
-        public JarArchive(IEnumerable<IJarArchiveFile> files)
+        public JarArchive(string archiveFileName)
         {
-            Files = files;
+            _archiveFileName = archiveFileName;
+            Files = getFilesList(archiveFileName);
+        }
+
+        public JarArchive(string sourceFolder, string archiveFileName)
+        {
+            _archiveFileName = archiveFileName;
+            ZipFile.CreateFromDirectory(sourceFolder, archiveFileName);
+            Files = getFilesList(archiveFileName);
         }
 
         public void Unpack(string targetFolder)
         {
-            throw new NotImplementedException();
+            // TODO: No file error
+            ZipFile.ExtractToDirectory(_archiveFileName, targetFolder);
+        }
+
+        private List<JarArchiveFile> getFilesList(string archiveFileName)
+        {
+            var files = new List<JarArchiveFile>();
+            using (ZipArchive archive = ZipFile.OpenRead(archiveFileName))
+            {
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    string filepath = entry.FullName;
+                    if (entry.Name.Length != 0)
+                    {
+                        filepath = filepath.Remove(entry.FullName.Length - entry.Name.Length);
+                    }
+                    var file = new JarArchiveFile(entry.Name, filepath, entry.Length);
+                    files.Add(file);
+                }
+            }
+            return files;
         }
     }
 }
