@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C23E63FA-BF44-4C0C-A54A-A39B94B802B3}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>JarArchivator</RootNamespace>
     <AssemblyName>JarArchivator</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
@@ -51,7 +51,6 @@
     <Compile Include="JarArchivator.cs" />
     <Compile Include="JarArchive.cs" />
     <Compile Include="JarArchiveFile.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,13 @@
 ﻿namespace JarArchivator
 {
-    public class JarArchivator //: IJarArchivator
+    public class JarArchivator : IJarArchivator
     {
-        public JarArchive Open(string archiveFileName)
+        public IJarArchive Open(string archiveFileName)
         {
             return new JarArchive(archiveFileName);
         }
 
-        public JarArchive Pack(string sourceFolder, string archiveFileName)
+        public IJarArchive Pack(string sourceFolder, string archiveFileName)
         {
             return new JarArchive(sourceFolder, archiveFileName);
         }
