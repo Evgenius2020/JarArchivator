@@ -5,7 +5,7 @@ namespace JarArchivator
 {
     public class JarArchive : IJarArchive
     {
-        private string _archiveFileName;
+        private readonly string _archiveFileName;
 
         public IEnumerable<IJarArchiveFile> Files { get; }
 
@@ -35,7 +35,7 @@ namespace JarArchivator
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    string filepath = entry.FullName;
+                    var filepath = entry.FullName;
                     if (entry.Name.Length != 0)
                     {
                         filepath = filepath.Remove(entry.FullName.Length - entry.Name.Length);

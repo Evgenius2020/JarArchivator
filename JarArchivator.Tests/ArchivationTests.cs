@@ -7,32 +7,32 @@ namespace JarArchivator.Tests
     [TestClass]
     public class ArchivationTests
     {
-        private const string testDirectory = "testDir/";
+        private const string _testDirectory = "testDir/";
         [TestInitialize]
         public void CreateTestDirectory()
         {
-            if (Directory.Exists(testDirectory))
+            if (Directory.Exists(_testDirectory))
             {
-                Directory.Delete(testDirectory, true);
+                Directory.Delete(_testDirectory, true);
             }
-            Directory.CreateDirectory(testDirectory);
+            Directory.CreateDirectory(_testDirectory);
         }
         [TestCleanup]
         public void CleanTestDirectory()
         {
-            Directory.Delete(testDirectory, true);
+            Directory.Delete(_testDirectory, true);
         }
 
         [TestMethod]
         public void PackOpenUnpack()
         {
             var testText = new string('t', 50);
-            const string srcDirectory = testDirectory + "src/";
-            const string destDirectory = testDirectory + "dest/";
+            const string srcDirectory = _testDirectory + "src/";
+            const string destDirectory = _testDirectory + "dest/";
             Directory.CreateDirectory(srcDirectory);
             const string testTextFileName = "test.txt";
             const string testTextFullFileName = srcDirectory + testTextFileName;
-            const string archiveFileName = testDirectory + "test.jar";
+            const string archiveFileName = _testDirectory + "test.jar";
             var testFile = File.CreateText(testTextFullFileName);
             testFile.Write(testText);
             testFile.Dispose();
@@ -42,7 +42,7 @@ namespace JarArchivator.Tests
             var archive = archivator.Pack(srcDirectory, archiveFileName);
             var filesList = archive.Files as List<JarArchiveFile>;
             Assert.AreEqual(1, filesList.Count);
-            var archiveFile = filesList[0] as JarArchiveFile;
+            var archiveFile = filesList[0];
             Assert.AreEqual(testTextFileName, archiveFile.Name);
             Assert.AreEqual("", archiveFile.Path); // Empty because in the root of source directory.
 
@@ -50,7 +50,7 @@ namespace JarArchivator.Tests
             archive = archivator.Open(archiveFileName);
             filesList = archive.Files as List<JarArchiveFile>;
             Assert.AreEqual(1, filesList.Count);
-            archiveFile = filesList[0] as JarArchiveFile;
+            archiveFile = filesList[0];
             Assert.AreEqual(testTextFileName, archiveFile.Name);
             Assert.AreEqual("", archiveFile.Path);
 
