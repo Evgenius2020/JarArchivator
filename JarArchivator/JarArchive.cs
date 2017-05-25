@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO.Compression;
+using System.Diagnostics;
+using System.Linq;
 
 namespace JarArchivator
 {
@@ -18,29 +19,50 @@ namespace JarArchivator
         public JarArchive(string sourceFolder, string archiveFileName)
         {
             _archiveFileName = archiveFileName;
-            ZipFile.CreateFromDirectory(sourceFolder, archiveFileName);
+            using (var process = new Process())
+            {
+                process.StartInfo.FileName = @"C:\Program Files\Java\jdk1.8.0_131\bin\jar.exe";
+                process.StartInfo.Arguments = $"cf {archiveFileName} {sourceFolder}";
+                process.StartInfo.UseShellExecute = false;
+                process.Start();
+                process.WaitForExit();
+            }
             Files = getFilesList(archiveFileName);
         }
 
         public void Unpack(string targetFolder)
         {
-            // TODO: No file error
-            ZipFile.ExtractToDirectory(_archiveFileName, targetFolder);
+            using (var process = new Process())
+            {
+                process.StartInfo.FileName = @"C:\Program Files\Java\jdk1.8.0_131\bin\jar.exe";
+                process.StartInfo.Arguments = $"xf {_archiveFileName} {targetFolder}";
+                process.StartInfo.UseShellExecute = false;
+                process.Start();
+                process.WaitForExit();
+            }
         }
 
-        private List<JarArchiveFile> getFilesList(string archiveFileName)
+        private IEnumerable<JarArchiveFile> getFilesList(string archiveFileName)
         {
             var files = new List<JarArchiveFile>();
-            using (ZipArchive archive = ZipFile.OpenRead(archiveFileName))
+            using (var process = new Process())
             {
-                foreach (ZipArchiveEntry entry in archive.Entries)
+                process.StartInfo.FileName = @"C:\Program Files\Java\jdk1.8.0_131\bin\jar.exe";
+                process.StartInfo.Arguments = "tvf " + archiveFileName;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.UseShellExecute = false;
+                process.Start();
+                process.WaitForExit();
+                while (!process.StandardOutput.EndOfStream)
                 {
-                    var filepath = entry.FullName;
-                    if (entry.Name.Length != 0)
-                    {
-                        filepath = filepath.Remove(entry.FullName.Length - entry.Name.Length);
-                    }
-                    var file = new JarArchiveFile(entry.Name, filepath, entry.Length);
+                    List<string> rawData = process.StandardOutput.ReadLine().Split(' ').ToList();
+                    rawData.RemoveAll(t => t == "");
+                    var size = long.Parse(rawData[0]);
+                    var fullName = rawData[7];
+                    var indexOfSeparation = fullName.Contains('/') ? fullName.LastIndexOf('/') + 1 : 0;
+                    var path = fullName.Substring(0, indexOfSeparation);
+                    var name = fullName.Substring(path.Length);
+                    var file = new JarArchiveFile(name, path, size);
                     files.Add(file);
                 }
             }
