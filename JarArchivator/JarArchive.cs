@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,7 @@ namespace JarArchivator
 {
     public class JarArchive : IJarArchive
     {
-        private readonly string _executableFilePath = @"C:\Program Files\Java\jdk1.8.0_131\bin\jar.exe";
+        private const string _executableFilePath = @"C:\Program Files\Java\jdk1.8.0_131\bin\jar.exe";
         private readonly string _archiveFileName;
 
         public IEnumerable<IJarArchiveFile> Files { get; }
@@ -25,6 +24,9 @@ namespace JarArchivator
             using (var process = new Process())
             {
                 process.StartInfo.FileName = _executableFilePath;
+                // TODO: Paths not working correclty with spaced filenames.
+                // This is not working.
+                // process.StartInfo.Arguments = $@"cf ""{archiveFileName}"" -C ""{sourceFolder}"" ./"; 
                 process.StartInfo.Arguments = $"cfv {archiveFileName} -C {sourceFolder} ./";
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
@@ -39,9 +41,15 @@ namespace JarArchivator
         {
             using (var process = new Process())
             {
-                process.StartInfo.FileName = @"C:\Program Files\Java\jdk1.8.0_131\bin\jar.exe";
-                process.StartInfo.Arguments = $"xf {_archiveFileName} {targetFolder}";
+                process.StartInfo.FileName = _executableFilePath;
+                // TODO: Bad idea. Only relative path is supported.
+                process.StartInfo.Arguments = $@"xf ""{Directory.GetCurrentDirectory()}\{_archiveFileName}""";
                 process.StartInfo.UseShellExecute = false;
+                if (!Directory.Exists(targetFolder))
+                {
+                    Directory.CreateDirectory(targetFolder);
+                }
+                process.StartInfo.WorkingDirectory = Directory.GetParent(targetFolder).ToString();
                 process.Start();
                 process.WaitForExit();
             }

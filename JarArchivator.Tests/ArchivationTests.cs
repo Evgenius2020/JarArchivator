@@ -30,14 +30,14 @@ namespace JarArchivator.Tests
             Directory.CreateDirectory(srcDirectory);
             const string testTextFileName = "test.txt";
             const string testTextFullFileName = srcDirectory + testTextFileName;
-            const string archiveFileName = _testDirectory + @"test.jar";
+            const string archiveFileName = _testDirectory + "test.jar";
             using (var file = File.CreateText(testTextFullFileName))
             {
                 file.Write(new string('t', 50));
             }
-            string destDirectory = $"{Directory.GetCurrentDirectory()}/{_testDirectory}dest/";
+            string destDirectory = _testDirectory + "dest/";
 
-            // Pack.
+            // Pack and open.
             var archivator = new JarArchivator();
             var archive = archivator.Pack(srcDirectory, archiveFileName);
             var filesList = archive.Files as List<JarArchiveFile>;
@@ -46,6 +46,10 @@ namespace JarArchivator.Tests
             var testFile = filesList.Find(f => f.Name == testTextFileName);
             Assert.AreEqual(testTextFileName, testFile.Name);
             Assert.AreEqual("", testFile.Path); // Empty because in the root of source directory.
+
+            // Unpack.
+            archive.Unpack(destDirectory);
+            Assert.IsTrue(File.Exists(destDirectory + testTextFileName));
         }
     }
 }
